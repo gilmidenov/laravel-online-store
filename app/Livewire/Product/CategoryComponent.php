@@ -36,15 +36,28 @@ class CategoryComponent extends Component
     #[Url]
     public array $selected_filters = [];
 
+    #[Url]
+    public $minPrice;
+
+    #[Url]
+    public $maxPrice;
+
     public function mount($slug)
     {
         $this->slug = $slug;
+        if (!isset($this->sortList[$this->sort])) {
+            $this->redirectRoute('category', ['slug' => $slug], navigate: true);
+        }
+
+        if  (!in_array($this->limit, $this->limitList)) {
+            $this->redirectRoute('category', ['slug' => $slug], navigate: true);
+        }
     }
 
     public function updated($property)
     {
         $property = explode('.', $property);
-        if ($property[0] == 'selected_filters') {
+        if (in_array($property[0],  ['selected_filters', 'minPrice', 'maxPrice'])) {
             $this->resetPage();
         }
     }
@@ -60,10 +73,36 @@ class CategoryComponent extends Component
         $this->resetPage();
     }
 
+    public function removeFilter($filter_id)
+    {
+        $key = array_search($filter_id, $this->selected_filters);
+        if (false !== $key) {
+            unset($this->selected_filters[$key]);
+            $this->selected_filters = array_values($this->selected_filters);
+            $this->resetPage();
+        }
+    }
+
+    public function clearFilters()
+    {
+        $this->selected_filters = [];
+        $this->resetPage();
+    }
+
     public function render()
     {
         $category = Category::query()->where('slug', '=', $this->slug)->firstOrFail();
         $ids      = \App\Helpers\Category\Category::getIds($category->id) . $category->id;
+
+        if (is_null($this->minPrice) || is_null($this->maxPrice)) {
+            $maxMinPrice = DB::table('products')
+                ->select(DB::raw('min(price) as min_price, max(price) as max_price'))
+                ->whereIn('category_id', explode(',', $ids))
+                ->get();
+
+            $this->minPrice = $this->minPrice ?? $maxMinPrice[0]->min_price;
+            $this->maxPrice = $this->maxPrice ?? $maxMinPrice[0]->max_price;
+        }
 
         $categoryFilters  = DB::table('category_filters')
             ->select('category_filters.filter_group_id', 'filter_groups.title', 'filters.id as filter_id', 'filters.title as filter_title')
@@ -77,7 +116,7 @@ class CategoryComponent extends Component
             $filterGroups[$filter->filter_group_id][] = $filter;
         }
 
-        if($this->selected_filters) {
+        if ($this->selected_filters) {
             $cntFilterGroups = DB::table('filters')
                 ->select(DB::raw('count(distinct filter_group_id) as cnt'))
                 ->whereIn('id', $this->selected_filters)
@@ -95,6 +134,7 @@ class CategoryComponent extends Component
                     ->groupBy('id')
                     ->havingRaw("count(distinct filter_products.filter_group_id) >= $cntFilterGroups");
             })
+            ->whereBetween('price', [$this->minPrice, $this->maxPrice])
             ->orderBy($this->sortList[$this->sort]['order_field'], $this->sortList[$this->sort]['order_direction'])
             ->paginate($this->limit);
 
