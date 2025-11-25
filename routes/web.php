@@ -9,4 +9,4 @@ use Livewire\Livewire;
 
 Route::get('/', \App\Livewire\HomeComponent::class)->name('home');
 Route::get('/category/{slug}', \App\Livewire\Product\CategoryComponent::class)->name('category');
-Route::get('/product', \App\Livewire\Product\ProductComponent::class)->name('product');
+Route::get('/product/{slug}', \App\Livewire\Product\ProductComponent::class)->name('product');

@@ -9,7 +9,7 @@
                             @if($loop->last)
                                 <li><span>{{ $breadcrumbs_title }}</span></li>
                             @else
-                                <li><a href="{{ route('category', $breadcrumbs_slug) }}">{{ $breadcrumbs_title }}</a></li>
+                                <li><a href="{{ route('category', $breadcrumbs_slug) }}" wire:navigate>{{ $breadcrumbs_title }} </a></li>
                             @endif
                         @endforeach
                     </ul>

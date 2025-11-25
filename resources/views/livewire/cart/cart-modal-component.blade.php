@@ -11,9 +11,9 @@
 
                     @foreach($cart as $id => $product)
                         <tr wire:key="{{ $id }}">
-                            <td class="product-img-td"><a href="{{ route('product') }}"><img src="{{ asset($product['image']) }}" alt=""></a>
+                            <td class="product-img-td"><a href="{{ route('product', $product['slug']) }}"><img src="{{ asset($product['image']) }}" alt=""></a>
                             </td>
-                            <td><a href="{{ route('product') }}"> {{$product['title']}}</a></td>
+                            <td><a href="{{ route('product', $product['slug']) }}"> {{$product['title']}}</a></td>
                             <td>${{ $product['price'] }}</td>
                             <td>&times;{{ $product['quantity'] }}</td>
                             <td><button wire:click="removeFromCart({{ $id }})" wire:loading.attr="disabled"

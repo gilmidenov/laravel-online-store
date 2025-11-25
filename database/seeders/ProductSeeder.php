@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         $gallery = [];
-        for ($i = 0; $i < rand(0, 7); $i++){
+        for ($i = 0; $i < rand(0, 7); $i++) {
             $gallery[] = 'assets/img/products' . ($i+1) . 'jpg';
         }
 
