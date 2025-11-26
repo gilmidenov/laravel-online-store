@@ -25,7 +25,7 @@ class Cart
                 $new_product = [
                     'title' => $product->title,
                     'slug' => $product->slug,
-                    'image' => $product->image,
+                    'image' => $product->getImage(),
                     'price' => $product->price,
                     'old_price' => $product->old_price,
                     'quantity' => $quantity,
